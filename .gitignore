@@ -1,0 +1,11 @@
+# OS / 에디터
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+
+# 환경/비밀키 (API 키 등은 절대 커밋 금지)
+.env
+*.local
+secrets.*
