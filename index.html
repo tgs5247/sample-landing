@@ -180,10 +180,7 @@
     <h2 data-edit>오시는 길</h2>
     <p class="lead" data-edit>서울특별시 ○○구 ○○로 00, 0층 (지하철 ○호선 ○○역 0번 출구 도보 5분)</p>
     <div class="map-box">
-      <div id="map">
-        카카오맵이 표시될 영역입니다.<br/>
-        (카카오 JavaScript 키 발급 후 연결 — 2단계에서 모듈로 추가)
-      </div>
+      <div id="map" style="background:var(--soft);color:var(--muted);text-align:center;padding:24px">지도를 불러오는 중…</div>
     </div>
   </div>
 </section>
@@ -194,12 +191,13 @@
     <p class="eyebrow" data-edit>CONTACT</p>
     <h2 data-edit>문의하기</h2>
     <p class="lead" data-edit>궁금한 점을 남겨주시면 빠르게 답변드리겠습니다.</p>
-    <!-- 실제 운영 시: 이 폼을 Tally 임베드 또는 EmailJS 연동으로 교체 (2단계 공통 부품) -->
-    <form class="form" onsubmit="alert('데모 폼입니다. 운영 시 Tally/EmailJS로 연결됩니다.');return false;">
-      <input type="text" placeholder="이름" required />
-      <input type="text" placeholder="연락처 또는 이메일" required />
-      <textarea placeholder="문의 내용을 입력하세요" required></textarea>
+    <!-- EmailJS 연동: 제출 시 tgs5247@gmail.com 으로 발송 -->
+    <form class="form" id="contactForm">
+      <input type="text" name="name" placeholder="이름" required />
+      <input type="text" name="email" placeholder="연락처 또는 이메일" required />
+      <textarea name="message" placeholder="문의 내용을 입력하세요" required></textarea>
       <button type="submit" class="btn">보내기</button>
+      <p id="formMsg" style="font-size:14px;margin-top:4px;color:#cbd5e1"></p>
     </form>
   </div>
 </section>
@@ -291,6 +289,47 @@
     if(confirm('수정한 내용을 모두 지우고 처음 상태로 되돌릴까요?')){localStorage.removeItem('siteEdit');location.reload();}
   });
   load();
+</script>
+
+<!-- ===== 카카오맵 ===== -->
+<script>
+  (function(){
+    var KAKAO_JS_KEY = "74d53257f27fe7de2b42dfffcb5a7f55";
+    var PLACE = { lat: 37.566826, lng: 126.978656, title: "브랜드명", level: 3 };
+    var box = document.getElementById('map');
+    var s = document.createElement('script');
+    s.src = "https://dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=" + KAKAO_JS_KEY;
+    s.onload = function(){
+      kakao.maps.load(function(){
+        box.style.padding='0'; box.textContent='';
+        var center = new kakao.maps.LatLng(PLACE.lat, PLACE.lng);
+        var map = new kakao.maps.Map(box, { center: center, level: PLACE.level });
+        var marker = new kakao.maps.Marker({ position: center }); marker.setMap(map);
+        new kakao.maps.InfoWindow({ content:'<div style="padding:6px 10px;font-size:13px">'+PLACE.title+'</div>' }).open(map, marker);
+      });
+    };
+    s.onerror = function(){ box.textContent = '지도를 불러오지 못했습니다. (도메인 등록 확인)'; };
+    document.head.appendChild(s);
+  })();
+</script>
+
+<!-- ===== 문의폼 (EmailJS) ===== -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  (function(){
+    var PUBLIC_KEY="kFKBk5n0QaZyrQeIe", SERVICE_ID="service_hrt8d2j", TEMPLATE_ID="1tnd9py";
+    if(window.emailjs) emailjs.init({ publicKey: PUBLIC_KEY });
+    var form=document.getElementById('contactForm'), msg=document.getElementById('formMsg');
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var btn=form.querySelector('button');
+      btn.disabled=true; msg.style.color='#cbd5e1'; msg.textContent='보내는 중...';
+      emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form)
+        .then(function(){ msg.style.color='#4ade80'; msg.textContent='✓ 문의가 정상 접수되었습니다. 곧 연락드리겠습니다.'; form.reset(); })
+        .catch(function(err){ msg.style.color='#f87171'; msg.textContent='전송에 실패했습니다. 잠시 후 다시 시도해주세요.'; console.error(err); })
+        .finally(function(){ btn.disabled=false; });
+    });
+  })();
 </script>
 </body>
 </html>
