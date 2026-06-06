@@ -308,7 +308,7 @@
         new kakao.maps.InfoWindow({ content:'<div style="padding:6px 10px;font-size:13px">'+PLACE.title+'</div>' }).open(map, marker);
       });
     };
-    s.onerror = function(){ box.textContent = '지도를 불러오지 못했습니다. (도메인 등록 확인)'; };
+    s.onerror = function(){ box.style.padding='24px'; box.innerHTML = '<div style="text-align:center"><div style="font-weight:600;margin-bottom:6px">📍 오시는 길</div><div style="font-size:14px">서울특별시 ○○구 ○○로 00, 0층</div></div>'; };
     document.head.appendChild(s);
   })();
 </script>
